@@ -8,11 +8,12 @@ export interface Contact {
   email: string | null;
   linkedId: number | null;
   linkPrecedence: LinkPrecedence;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   deletedAt: string | null;
 }
 
+// Find contacts by matching email or phone number
 export const findContactsByEmailOrPhone = async (
   email?: string,
   phoneNumber?: string
@@ -25,15 +26,45 @@ export const findContactsByEmailOrPhone = async (
     .andWhere('deletedAt', null);
 };
 
-export const createContact = async (contact: Partial<Contact>): Promise<Contact> => {
+// Create a new contact (primary or secondary)
+export const createContact = async (
+  contact: {
+    email?: string;
+    phoneNumber?: string;
+    linkPrecedence?: LinkPrecedence;
+    linkedId?: number;
+  }
+): Promise<Contact> => {
   const [newContact] = await db<Contact>('contacts')
-    .insert(contact)
+    .insert({
+      email: contact.email ?? null,
+      phoneNumber: contact.phoneNumber ?? null,
+      linkPrecedence: contact.linkPrecedence ?? 'primary',
+      linkedId: contact.linkedId ?? null,
+    })
     .returning('*');
   return newContact;
 };
 
-export const updateContact = async (id: number, updates: Partial<Contact>): Promise<void> => {
+// Update existing contact fields with proper datetime
+export const updateContact = async (
+  id: number,
+  updates: {
+    linkPrecedence?: LinkPrecedence;
+    linkedId?: number;
+  }
+): Promise<void> => {
+  const dbUpdates: Partial<Record<string, any>> = {};
+  if (updates.linkPrecedence !== undefined) {
+    dbUpdates.linkPrecedence = updates.linkPrecedence;
+  }
+  if (updates.linkedId !== undefined) {
+    dbUpdates.linkedId = updates.linkedId;
+  }
+  // Use database's current timestamp
+  dbUpdates.updated_at = db.fn.now();
+
   await db<Contact>('contacts')
     .where({ id })
-    .update({ ...updates, updatedAt: new Date().toISOString() });
+    .update(dbUpdates);
 };

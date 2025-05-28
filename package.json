@@ -6,7 +6,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "migrate": "ts-node -r dotenv/config ./node_modules/knex/bin/cli.js --knexfile src/knexfile.ts migrate:latest",
+    "migrate": "npx ts-node -r dotenv/config ./node_modules/knex/bin/cli.js --knexfile src/knexfile.ts migrate:latest",
     "test": "jest"
   },
   "keywords": [],

@@ -4,7 +4,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connection: string | Knex.PgConnectionConfig = process.env.DATABASE_URL
+const isProd = process.env.NODE_ENV === 'production';
+
+const connection: string | Knex.PgConnectionConfig = process.env.DATABASE_URL!
   ? process.env.DATABASE_URL
   : {
       host: process.env.DB_HOST,
@@ -19,7 +21,7 @@ const config: Knex.Config = {
   connection,
   migrations: {
     directory: path.join(__dirname, 'migrations'),
-    extension: 'ts',
+    extension: isProd ? 'js' : 'ts',
   },
 };
 
